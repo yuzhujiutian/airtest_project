@@ -6,22 +6,28 @@ sys.path.append('.')
 __author__ = '1084502012@qq.com'
 __all__ = ['d']
 
-import conf
+from config import conf
 from airtest.aircv import *
 from airtest.core.api import *
 from airtest.core.helper import *
 from tools.logger import init_logging
-from airtest.core.settings import Settings as ST
 from airtest.core.android.android import Android
+from airtest.core.android.constant import YOSEMITE_IME_SERVICE
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
-# exception
-from poco.exceptions import *
-from airtest.core.error import *
 
 
 class AirPage(object):
     """
     Airtest和poco的方法集合
+     Selector
+        text, textContains, textMatches, textStartsWith
+        className, classNameMatches
+        description, descriptionContains, descriptionMatches, descriptionStartsWith
+        checkable, checked, clickable, longClickable
+        scrollable, enabled,focusable, focused, selected
+        packageName, packageNameMatches
+        resourceId, resourceIdMatches
+        index, instance
     """
 
     def __init__(self):
@@ -40,29 +46,34 @@ class AirPage(object):
     """
 
     @staticmethod
-    def template(img_name):
+    def template(img_name: str, rgb: bool = True, record_pos: tuple = (0.5, -0.5)):
         """CV识别主函数
+        :param rgb: 灰度识别还是色彩识别
+        :param record_pos: 图片坐标
         :param img_name: 图片名称
         :return:
         """
-        temp = Template(repr(img_name), record_pos=(0.5, -0.5), resolution=screen())
+        temp = Template(r"%s" % img_name, rgb=rgb, record_pos=record_pos, resolution=d.screen)
         return temp
 
-    def airtest_touch(self, name):
+    def airtest_touch(self, *args):
         """触摸函数"""
-        touch(AirPage.template(name))
+        touch(AirPage.template(*args))
 
-    def airtest_text(self, name):
+    def airtest_text(self, content):
         """输入函数"""
-        text(name)
+        text(content)
 
-    def airtest_wait(self, name):
+    def airtest_wait(self, *args):
         """等待函数"""
-        wait(AirPage.template(name))
+        wait(AirPage.template(*args))
 
-    def airtest_exist(self, name):
+    def airtest_exist(self, *args):
         """判断函数"""
-        return exists(AirPage.template(name))
+        return exists(AirPage.template(*args))
+
+    def assert_exist(self, *args, msg: str = None):
+        assert_exists(AirPage.template(*args), msg)
 
     def starts_app(self, *args, **kwargs):
         """
@@ -70,7 +81,7 @@ class AirPage(object):
             :param package: 要启动的包的名称，例如"com.netease.my"
             :param activity:开始的活动，默认为无，表示主要活动
         """
-        start_app(self, *args, **kwargs)
+        start_app(*args, **kwargs)
 
     def stops_app(self, *args, **kwargs):
         """
@@ -84,8 +95,23 @@ class AirPage(object):
     poco-method
     """
 
-    def wait_any(self):
-        self.poco.wait_for_any()
+    def wait_any(self, *args, **kwargs):
+        """
+        等待，直到所有给定的 UI 代理在超时之前显示。将定期轮询所有 UI 代理。
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        return self.poco.wait_for_any(*args, **kwargs)
+
+    def wait_all(self, *args, **kwargs):
+        """
+        等待，直到所有给定的 UI 代理在超时之前显示。将定期轮询所有 UI 代理。
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        return self.poco.wait_for_all(*args, **kwargs)
 
     def poco_click(self, *args, **kwargs):
         """
@@ -95,7 +121,32 @@ class AirPage(object):
         :param args:
         :param kwargs: [text,name]
         """
-        self.poco(*args, **kwargs).click()
+        ele = self.poco(*args, **kwargs)
+        ele.wait_for_appearance()  # 阻止并等待
+        ele.click()
+
+    def poco_get_text(self, *args, **kwargs):
+        """
+        获取 UI 元素的文本属性。如果没有此类属性，则返回"无"。
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        return self.poco(*args, **kwargs).get_text()
+
+    def poco_attr(self, name, *args, **kwargs):
+        """
+        按给定属性名称检索 UI 元素的属性。如果属性不存在，则返回"无"。
+        visible：用户是否可见
+        text：UI 元素的字符串值
+        type：远程运行时的 UI 元素的类型名称
+        pos：UI 元素的位置
+        size：根据屏幕，0+1 范围内的百分比大小 [宽度、高度]
+        name：UI 元素的名称
+        ...： other sdk 实现的属性
+        :return:
+        """
+        self.poco(*args, **kwargs).attr(name)
 
     def poco_exists(self, *args, **kwargs):
         """
@@ -160,7 +211,13 @@ class AirPage(object):
         """获取顶级活动"""
         return self.android.get_top_activity()
 
+    def yosemite_ime_end(self):
+        """关闭airtest输入法"""
+        self.android.adb.shell("ime disable %s" % YOSEMITE_IME_SERVICE)
+        # self.android.adb.shell("ime set %s" % )
+
 
 d = AirPage()
 if __name__ == '__main__':
-    pass
+    print(d.device_id)
+    print(d.screen)

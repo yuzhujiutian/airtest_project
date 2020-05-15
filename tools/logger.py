@@ -6,7 +6,7 @@ sys.path.append('.')
 __author__ = '1084502012@qq.com'
 
 import os
-import conf
+from config import conf
 import logging
 import datetime
 

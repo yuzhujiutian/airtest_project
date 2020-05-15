@@ -9,6 +9,27 @@ import pytest
 import requests
 from py._xmlgen import html
 from basic.base import d
+from common.readconfig import ini
+
+
+@pytest.fixture(scope='session', autouse=True)
+def set_session(request):
+    """
+    切换输入法
+    """
+    print("开始测试！")
+    d.starts_app(ini.package_name)
+    d.poco_click(text="发现")
+    d.poco_click(text="小程序")
+    d.poco_click(text="西安曲江池遗址公园")
+
+    def fn():
+        d.poco_click(desc="关闭")
+        d.stops_app(ini.package_name)
+        d.poco.ime.end()  # 返回至默认的键盘
+        print("结束测试！")
+
+    request.addfinalizer(fn)
 
 
 @pytest.mark.hookwrapper
@@ -32,7 +53,8 @@ def pytest_runtest_makereport(item):
                 extra.append(pytest_html.extras.html(html))
         report.extra = extra
         report.description = str(item.function.__doc__)
-        report.nodeid = report.nodeid.encode("utf-8").decode("unicode_escape")
+        # report.nodeid = report.nodeid.encode("utf-8").decode("unicode_escape")
+        # 防止乱码
 
 
 @pytest.mark.optionalhook
@@ -55,18 +77,3 @@ def _capture_screenshot():
     :return:
     """
     return d.poco_shot_base64()
-
-
-@pytest.fixture(scope='session', autouse=True)
-def set_session(request):
-    """
-    切换输入法
-    """
-    print("开始测试！")
-    d.start_app('')
-
-    def fn():
-        d.poco.ime.end()  # 返回至默认的键盘
-        print("结束测试！")
-
-    request.addfinalizer(fn)
