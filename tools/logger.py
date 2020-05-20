@@ -6,9 +6,9 @@ sys.path.append('.')
 __author__ = '1084502012@qq.com'
 
 import os
-from config import conf
 import logging
 import datetime
+from config import conf
 
 
 def log_file():
@@ -33,5 +33,13 @@ def init_logging():
     logger.addHandler(handler)
 
 
+def clear_log():
+    for i in os.listdir(conf.TEST_CASE_LOG):
+        file = os.path.join(conf.TEST_CASE_LOG, i)
+        os.remove(file)
+        print("删除：{}".format(file))
+
+
 if __name__ == '__main__':
     print(log_file())
+    print(clear_log())

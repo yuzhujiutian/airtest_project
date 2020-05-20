@@ -6,9 +6,8 @@ sys.path.append('.')
 __author__ = '1084502012@qq.com'
 
 import pytest
-import requests
 from py._xmlgen import html
-from basic.base import d
+from basic.base import d, wake
 from common.readconfig import ini
 
 
@@ -18,6 +17,7 @@ def set_session(request):
     切换输入法
     """
     print("开始测试！")
+    wake()
     d.starts_app(ini.package_name)
     d.poco_click(text="发现")
     d.poco_click(text="小程序")

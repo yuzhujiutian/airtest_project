@@ -4,39 +4,34 @@ import sys
 
 sys.path.append('.')
 __author__ = '1084502012@qq.com'
-__all__ = ['d']
 
 from config import conf
 from airtest.aircv import *
 from airtest.core.api import *
 from airtest.core.helper import *
+from tools.logger import clear_log
 from tools.logger import init_logging
 from airtest.core.android.android import Android
 from airtest.core.android.constant import YOSEMITE_IME_SERVICE
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 
 
-class AirPage(object):
+class AirPoco(object):
     """
     Airtest和poco的方法集合
-     Selector
-        text, textContains, textMatches, textStartsWith
-        className, classNameMatches
-        description, descriptionContains, descriptionMatches, descriptionStartsWith
-        checkable, checked, clickable, longClickable
-        scrollable, enabled,focusable, focused, selected
-        packageName, packageNameMatches
-        resourceId, resourceIdMatches
-        index, instance
+     poco-Selector
+        text, textMatches
     """
 
     def __init__(self):
         """
         init初始化
         """
+        # 删除旧日志
+        clear_log()
         # 设置全局日志目录
-        set_logdir(conf.LOG_PATH)
-        # 初始化日志
+        set_logdir(conf.TEST_CASE_LOG)
+        # # 初始化日志
         init_logging()
         self.android = Android()
         self.poco = AndroidUiautomationPoco(force_restart=False)
@@ -58,7 +53,7 @@ class AirPage(object):
 
     def airtest_touch(self, *args):
         """触摸函数"""
-        touch(AirPage.template(*args))
+        touch(AirPoco.template(*args))
 
     def airtest_text(self, content):
         """输入函数"""
@@ -66,14 +61,15 @@ class AirPage(object):
 
     def airtest_wait(self, *args):
         """等待函数"""
-        wait(AirPage.template(*args))
+        wait(AirPoco.template(*args))
 
     def airtest_exist(self, *args):
         """判断函数"""
-        return exists(AirPage.template(*args))
+        return exists(AirPoco.template(*args))
 
-    def assert_exist(self, *args, msg: str = None):
-        assert_exists(AirPage.template(*args), msg)
+    def assert_exists(self, *args, msg: str = None):
+        """断言函数"""
+        assert_exists(AirPoco.template(*args), msg)
 
     def starts_app(self, *args, **kwargs):
         """
@@ -183,11 +179,11 @@ class AirPage(object):
     aircv-method
     """
 
-    def crop_image(self, img, rect):
+    def crop_image(self, rect):
         """局部截图
-        :param img:
-        :param rect:
+        :param rect = [x_min, y_min, x_max ,y_max].
         """
+        img = G.DEVICE.snapshot()
         crop_screen = crop_image(img, rect)  # 局部截图
         try_log_screen(crop_screen)  # 保存局部截图到logs文件夹中
 
@@ -217,7 +213,7 @@ class AirPage(object):
         # self.android.adb.shell("ime set %s" % )
 
 
-d = AirPage()
+d = AirPoco()
 if __name__ == '__main__':
     print(d.device_id)
     print(d.screen)
