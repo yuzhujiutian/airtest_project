@@ -34,8 +34,9 @@ def init_logging():
 
 
 def clear_log():
-    for i in os.listdir(conf.TEST_CASE_LOG):
-        file = os.path.join(conf.TEST_CASE_LOG, i)
+    """清除上一次的日志记录"""
+    for i in os.listdir(conf.TEST_LOG):
+        file = os.path.join(conf.TEST_LOG, i)
         os.remove(file)
         print("删除：{}".format(file))
 

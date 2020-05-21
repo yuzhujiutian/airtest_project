@@ -8,6 +8,7 @@ __author__ = '1084502012@qq.com'
 import time
 import datetime
 from airtest.report.report import timefmt
+from airtest.core.api import sleep
 
 
 def timestamp():
@@ -15,7 +16,7 @@ def timestamp():
     return time.time()
 
 
-def strftime(fmt="%Y%m%d%H%M%S"):
+def strftime(fmt="%Y%m%d-%H%M%S"):
     """格式化时间"""
     return time.strftime(fmt, time.localtime(time.time()))
 

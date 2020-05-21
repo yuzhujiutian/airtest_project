@@ -12,6 +12,8 @@ import config.conf as cfg
 
 APP = "APP"
 package = "package"
+IME = "IME"
+default_ime = "default_ime"
 
 
 class ReadConfig(object):
@@ -28,6 +30,10 @@ class ReadConfig(object):
     @property
     def package_name(self):
         return self._get(APP, package)
+
+    @property
+    def default_ime(self):
+        return self._get(IME, default_ime)
 
 
 ini = ReadConfig()
