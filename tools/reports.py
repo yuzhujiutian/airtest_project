@@ -21,10 +21,10 @@ def report_path():
     return report_paths
 
 
-def get_report(script, outfile, log_root, lang="zh", record_list=None):
-    """生成report"""
+def get_report(script, outfile, log_root, static_root="", lang="zh", record_list=None):
+    """生成airtest_report"""
     path, name = script_dir_name(script)
-    rpt = LogToHtml(path, log_root, export_dir=report_path(), script_name=name, lang=lang,
+    rpt = LogToHtml(path, log_root, static_root=static_root, export_dir=report_path(), script_name=name, lang=lang,
                     plugins=["poco.utils.airtest.report"])
     rpt.report(HTML_TPL, output_file=outfile, record_list=record_list)
 

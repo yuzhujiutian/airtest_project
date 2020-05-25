@@ -13,3 +13,6 @@ def aaa():
 
 print(aaa.__doc__)
 print(aaa.__name__)
+
+
+print(repr("/user/bin/python3"))

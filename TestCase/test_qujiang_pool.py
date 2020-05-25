@@ -10,11 +10,10 @@ __desc__ = """
 用例2: 预约一个场地，然后取消预约
 """
 
-import unittest
+import pytest
 import functools
 from basic.base import *
 from tools.times import strftime
-from common.readconfig import ini
 from common.readimg import ReadImg
 from tools.reports import get_report
 
@@ -22,28 +21,12 @@ index_img = ReadImg('index')
 my_img = ReadImg('my')
 
 
-def setUpModule():
-    log(d.device_id)
-    wake()
-    start_app(ini.package_name)
-    d.poco_click(text="发现")
-    d.poco_click(text="小程序")
-    d.poco_click(text="西安曲江池遗址公园")
-    d.airtest_wait(index_img['运动打卡_参与排名'])
-
-
-def tearDownModule():
-    stop_app(ini.package_name)
-    d.yosemite_ime_end(ini.default_ime)
-    get_report(__file__, 'log.html', log_root='./log')
-
-
 def back_home():
     """返回首页"""
     while not d.airtest_exists(index_img['运动打卡_参与排名']):
         try:
-            d.poco_click(resourceId='com.tencent.mm:id/q0')
-        except PocoTargetTimeout:
+            d.poco(resourceId='com.tencent.mm:id/q0').click()
+        except PocoNoSuchNodeException:
             d.poco_click(text="首页")
 
 
@@ -58,14 +41,27 @@ def case_name(func):
     return wrapper
 
 
-class TestQujiangPool(unittest.TestCase):
+class TestQujiangPool:
     """曲江池遗址公园"""
 
-    def setUp(self) -> None:
+    @pytest.fixture(scope='class', autouse=True)
+    def generate_report(self, request):
+        """生成报告"""
+
+        def fn():
+            get_report(__file__, 'log.html', log_root='./log')
+
+        request.addfinalizer(fn)
+
+    @pytest.fixture(scope='function', autouse=True)
+    def applet_home(self, request):
+        """回到小程序首页"""
         back_home()
 
-    def tearDown(self) -> None:
-        back_home()
+        def fn():
+            back_home()
+
+        request.addfinalizer(fn)
 
     @case_name
     def test_001(self):
@@ -86,9 +82,11 @@ class TestQujiangPool(unittest.TestCase):
         d.poco_click(text="选择入园时间")
         d.poco_click(text="确定")
         page_time = strftime("%Y-%m-%d")
-        assert_equal(d.poco_exists(text=page_time), True)
+        now_days = d.poco_exists(text=page_time)
+        assert_equal(now_days, True)
         d.poco_click(text="确认预约")
-        assert_not_equal(d.poco_exists(text="用户已预约场地"), d.poco_exists(text='热力篮球预约成功'))
+        assert_not_equal(d.poco_exists(text="用户已预约场地"),
+                         d.poco_exists(text='热力篮球预约成功'))
         back_home()
         d.poco_click(text="我的")
         d.poco_click(text="我的场地")
@@ -101,4 +99,4 @@ class TestQujiangPool(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    pytest.main(['test_qujiang_pool.py'])

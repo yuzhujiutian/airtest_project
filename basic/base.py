@@ -39,6 +39,7 @@ class AirtestPoco(object):
         init_logging()
         self.android = Android()
         self.poco = AndroidUiautomationPoco(force_restart=False)
+        self.timeout = ST.FIND_TIMEOUT  # 等待显示时间
 
     """
     AirTest-Method
@@ -138,10 +139,10 @@ class AirtestPoco(object):
         if 'index' in kwargs:
             index = kwargs.pop('index')
             ele = self.poco(*args, **kwargs)[index]
-            ele.wait_for_appearance(timeout=ST.FIND_TIMEOUT)
+            ele.wait_for_appearance(timeout=self.timeout)
             return ele
         ele = self.poco(*args, **kwargs)
-        ele.wait_for_appearance(timeout=ST.FIND_TIMEOUT)
+        ele.wait_for_appearance(timeout=self.timeout)
         return ele
 
     def poco_click(self, *args, **kwargs):
