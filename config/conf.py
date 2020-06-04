@@ -8,7 +8,7 @@ __author__ = '1084502012@qq.com'
 import os
 
 # 项目目录
-BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # 日志目录
 LOG_PATH = os.path.join(BASE_DIR, 'log')

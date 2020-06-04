@@ -142,3 +142,4 @@ cython_debug/
 
 .idea/
 log/
+demo.py

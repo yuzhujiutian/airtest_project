@@ -21,15 +21,15 @@ def set_session(request):
     """
     log("开始测试！")
     log(d.device_id)
-    wake()
-    start_app(ini.package_name)
+    air_api.wake()
+    air_api.start_app(ini.package_name)
     d.poco_click(text="发现")
     d.poco_click(text="小程序")
     d.poco_click(text="西安曲江池遗址公园")
 
     def fn():
         d.poco_click(desc="关闭")
-        stop_app(ini.package_name)
+        air_api.stop_app(ini.package_name)
         d.yosemite_ime_end(ini.default_ime)  # 返回至默认的键盘
         log("结束测试！")
 

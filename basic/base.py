@@ -4,25 +4,29 @@ import sys
 
 sys.path.append('.')
 __author__ = '1084502012@qq.com'
+__all__ = ['d', 'log', 'air_api', 'air_error', 'poco_error']
 
 from config import conf
-from airtest.core.api import *
 from tools.logger import clear_log
 from tools.logger import init_logging
 from airtest.aircv import crop_image
+from airtest.core import api as air_api
 from airtest.core.helper import set_logdir, log
 from airtest.core.android.android import Android
 from airtest.core.android.constant import YOSEMITE_IME_SERVICE
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
+from poco.proxy import UIObjectProxy
 # exceptions
-from airtest.core.error import *
-from poco.exceptions import *
+from airtest.core import error as air_error
+from poco import exceptions as poco_error
 
 
 class AirtestPoco(object):
     """
-    Airtest和poco的方法集合
-     poco-Selector
+    Airtest和Poco的方法集合
+    airtest-api
+        air_api,methods
+    poco-Selector
         text, textMatches
     """
 
@@ -39,7 +43,8 @@ class AirtestPoco(object):
         init_logging()
         self.android = Android()
         self.poco = AndroidUiautomationPoco(force_restart=False)
-        self.timeout = ST.FIND_TIMEOUT  # 等待显示时间
+        self.UIObject = UIObjectProxy(poco=self.poco)
+        self.timeout = air_api.ST.FIND_TIMEOUT  # 等待显示时间
 
     """
     AirTest-Method
@@ -54,18 +59,18 @@ class AirtestPoco(object):
         :param img_name: 图片名称
         :return:
         """
-        temp = Template(r"%s" % img_name, rgb=rgb, record_pos=record_pos, resolution=d.screen)
+        temp = air_api.Template(r"%s" % img_name, rgb=rgb, record_pos=record_pos, resolution=d.screen)
         return temp
 
     def airtest_touch(self, v: str, *args, **kwargs):
         """触摸函数"""
-        touch(self.template(v), *args, **kwargs)
+        air_api.touch(self.template(v), *args, **kwargs)
 
-    def airtest_double_click(self, v):
+    def airtest_double_click(self, v: str):
         """双击"""
-        double_click(self.template(v))
+        air_api.double_click(self.template(v))
 
-    def airtest_swipe(self, v1, v2=None, vector=None, **kwargs):
+    def airtest_swipe(self, v1: str, v2=None, vector=None, **kwargs):
         """
         在设备屏幕上执行滑动操作。
         分配参数有两种方法
@@ -85,23 +90,23 @@ class AirtestPoco(object):
             v1 = self.template(v1)
         if v2.endswith('.png'):
             v2 = self.template(v2)
-        return swipe(v1, v2, vector, **kwargs)
+        return air_api.swipe(v1, v2, vector, **kwargs)
 
     def airtest_wait(self, v, *args, **kwargs):
         """等待函数"""
-        wait(self.template(v), *args, **kwargs)
+        air_api.wait(self.template(v), *args, **kwargs)
 
     def airtest_exists(self, v):
         """判断函数"""
-        return exists(self.template(v))
+        return air_api.exists(self.template(v))
 
     def assert_exists(self, v, msg: str = None):
         """断言函数"""
-        assert_exists(self.template(v), msg)
+        air_api.assert_exists(self.template(v), msg)
 
     def assert_not_exists(self, v, msg: str = None):
         """断言函数"""
-        assert_not_exists(self.template(v), msg)
+        air_api.assert_not_exists(self.template(v), msg)
 
     def find_all(self, v):
         """
@@ -110,38 +115,42 @@ class AirtestPoco(object):
         :return:坐标列表，[（x，y），（x1，y1），…]
         :平台：Android、Windows、iOS
         """
-        return find_all(self.template(v))
+        return air_api.find_all(self.template(v))
 
     """
     poco-method
     """
 
-    def wait_any(self, *args, **kwargs):
+    def poco_wait_any(self, objects):
         """
         等待，直到所有给定的 UI 代理在超时之前显示。将定期轮询所有 UI 代理。
-        :param args:
-        :param kwargs:
-        :return:
+        :param objects:
+        :return: bool
         """
-        return self.poco.wait_for_any(*args, **kwargs)
+        try:
+            return self.poco.wait_for_any(objects, timeout=air_api.ST.FIND_TIMEOUT)
+        except poco_error.PocoTargetTimeout:
+            return False
 
-    def wait_all(self, *args, **kwargs):
+    def poco_wait_all(self, objects):
         """
         等待，直到所有给定的 UI 代理在超时之前显示。将定期轮询所有 UI 代理。
-        :param args:
-        :param kwargs:
+        :param objects:
         :return:
         """
-        return self.poco.wait_for_all(*args, **kwargs)
+        try:
+            self.poco.wait_for_all(objects, timeout=air_api.ST.FIND_TIMEOUT)
+            return True
+        except poco_error.PocoTargetTimeout:
+            return False
 
     def poco_obj(self, *args, **kwargs):
         """poco实例"""
         if 'index' in kwargs:
             index = kwargs.pop('index')
             ele = self.poco(*args, **kwargs)[index]
-            ele.wait_for_appearance(timeout=self.timeout)
-            return ele
-        ele = self.poco(*args, **kwargs)
+        else:
+            ele = self.poco(*args, **kwargs)
         ele.wait_for_appearance(timeout=self.timeout)
         return ele
 
@@ -155,6 +164,21 @@ class AirtestPoco(object):
         """
         log("点击元素：{}".format(kwargs))
         self.poco_obj(*args, **kwargs).click()
+        self.poco.wait_stable()
+
+    def poco_click_pos(self, pos: list):
+        """
+        在给定坐标下对目标设备执行单击(触摸，轻击等)操作。坐标(x, y)是一个2-列表或2-元组。
+        x和y的坐标值必须在0 ~ 1之间，以表示屏幕的百分比。
+        例如，坐标[0.5,0.5]表示屏幕的中心，坐标[0,0]表示左上角。
+        有关坐标系统的详细信息，请参阅CoordinateSystem。
+        实际案例：
+            单击分辨率为（1920，1080）的屏幕的（100，100）点：
+                poco.click([100.0 / 1920, 100.0 / 1080])
+        :param pos: (list(float, float) / tuple(float, float)) – coordinates (x, y) in range of 0 to 1
+        :return:
+        """
+        self.poco.click(pos)
 
     def poco_get_text(self, *args, **kwargs):
         """
@@ -181,13 +205,25 @@ class AirtestPoco(object):
         """
         self.poco_obj(*args, **kwargs).attr(name)
 
+    def poco_freeze(self, *args, **kwargs):
+        """冻结UI树并返回当前的UI结果树"""
+        with self.poco.freeze() as freeze:
+            dump = freeze(*args, **kwargs)
+        return dump
+
+    def poco_hierarchy_dict(self):
+        """获取当前结构树的字典"""
+        frozen_poco = self.poco.freeze()
+        hierarchy_dict = frozen_poco.agent.hierarchy.dump()
+        return hierarchy_dict
+
     def poco_exists(self, *args, **kwargs):
         """
         测试UI元素是否在层次结构中
         :param args:
         :param kwargs: [text,name]
         """
-        result = self.poco(*args, **kwargs).exists()
+        result = self.poco_freeze(*args, **kwargs).exists()
         log("元素{}验证结果: {}".format(kwargs, result))
         return result
 
@@ -222,9 +258,9 @@ class AirtestPoco(object):
         """局部截图
         :param rect = [x_min, y_min, x_max ,y_max].
         """
-        img = G.DEVICE.snapshot()
+        img = air_api.G.DEVICE.snapshot()
         crop_screen = crop_image(img, rect)  # 局部截图
-        try_log_screen(crop_screen)  # 保存局部截图到logs文件夹中
+        air_api.try_log_screen(crop_screen)  # 保存局部截图到logs文件夹中
 
     """
     设备相关
@@ -253,6 +289,7 @@ class AirtestPoco(object):
 
 
 d = AirtestPoco()
+
 if __name__ == '__main__':
     print(d.get_top_activity)
     print(d.screen)
