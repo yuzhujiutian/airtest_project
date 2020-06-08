@@ -9,9 +9,6 @@ import pytest
 from py._xmlgen import html
 from basic.base import *
 from common.readconfig import ini
-from common.readimg import ReadImg
-
-index_img = ReadImg('index')
 
 
 @pytest.fixture(scope='session', autouse=True)

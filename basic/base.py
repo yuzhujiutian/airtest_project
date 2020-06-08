@@ -42,8 +42,8 @@ class AirtestPoco(object):
         # # 初始化日志
         init_logging()
         self.android = Android()
-        self.poco = AndroidUiautomationPoco(force_restart=False)
-        self.UIObject = UIObjectProxy(poco=self.poco)
+        self.poco = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
+        self.UIObj = UIObjectProxy(poco=self.poco)
         self.timeout = air_api.ST.FIND_TIMEOUT  # 等待显示时间
 
     """
@@ -62,15 +62,15 @@ class AirtestPoco(object):
         temp = air_api.Template(r"%s" % img_name, rgb=rgb, record_pos=record_pos, resolution=d.screen)
         return temp
 
-    def airtest_touch(self, v: str, *args, **kwargs):
+    def touch(self, v: str, *args, **kwargs):
         """触摸函数"""
         air_api.touch(self.template(v), *args, **kwargs)
 
-    def airtest_double_click(self, v: str):
+    def double_click(self, v: str):
         """双击"""
         air_api.double_click(self.template(v))
 
-    def airtest_swipe(self, v1: str, v2=None, vector=None, **kwargs):
+    def swipe(self, v1: str, v2=None, vector=None, **kwargs):
         """
         在设备屏幕上执行滑动操作。
         分配参数有两种方法
@@ -92,11 +92,11 @@ class AirtestPoco(object):
             v2 = self.template(v2)
         return air_api.swipe(v1, v2, vector, **kwargs)
 
-    def airtest_wait(self, v, *args, **kwargs):
+    def wait(self, v, *args, **kwargs):
         """等待函数"""
         air_api.wait(self.template(v), *args, **kwargs)
 
-    def airtest_exists(self, v):
+    def exists(self, v):
         """判断函数"""
         return air_api.exists(self.template(v))
 
@@ -166,7 +166,7 @@ class AirtestPoco(object):
         self.poco_obj(*args, **kwargs).click()
         self.poco.wait_stable()
 
-    def poco_click_pos(self, pos: list):
+    def poco_click_pos(self, pos):
         """
         在给定坐标下对目标设备执行单击(触摸，轻击等)操作。坐标(x, y)是一个2-列表或2-元组。
         x和y的坐标值必须在0 ~ 1之间，以表示屏幕的百分比。
@@ -227,18 +227,34 @@ class AirtestPoco(object):
         log("元素{}验证结果: {}".format(kwargs, result))
         return result
 
-    def poco_scroll(self, *args, **kwargs):
+    def poco_scroll(self, direction='vertical', percent=0.5, duration=2.0):
         """
         从整个屏幕的下部滚动到上部
-        方向：滚动方向。垂直或“水平”
-        百分比：根据
-        持续时间：执行操作的时间间隔
-        :param args:
-        :param kwargs: direction="vertical" or "horizontal", percent=0.6, duration=2.0
+        默认的 direction='vertical', percent=0.6, duration=2.0
+        :param direction: 方向：滚动方向。垂直(vertical)或“水平”(horizontal)
+        :param duration: 百分比：根据
+        :param percent: 持续时间：执行操作的时间间隔
         """
-        self.poco.scroll(*args, **kwargs)
+        self.poco.scroll(direction=direction, percent=percent, duration=duration)
 
-    def poco_shot_base64(self, width=720):
+    def poco_swipe(self, p1, p2=None, direction=None, duration: float = 2.0):
+        """
+        在目标设备上通过起点和终点或方向向量指定的点到点执行滑动操作。必须至少提供端点或方向之一。
+        点的坐标（x，y）定义与click事件的定义相同。方向矢量（x，y）的分量也以0到1的屏幕范围表示。
+        请参阅CoordinateSystem以获取有关坐标系的更多详细信息。
+        实际案例
+            以下示例显示了如何在分辨率为1920x1080的屏幕上执行从（100，100）到（100，200）的滑动动作：
+                poco.swipe([100.0 / 1920, 100.0 / 1080], [100.0 / 1920, 200.0 / 1080])
+            或由特定方向而非终点给定：
+                poco.swipe([100.0 / 1920, 100.0 / 1080], direction=[0, 100.0 / 1080])
+        :param p1: 起点
+        :param p2: 终点
+        :param direction: 滑动方向
+        :param duration: 持续时间（float）–执行滑动操作的时间间隔
+        """
+        self.poco.swipe(p1=p1, p2=p2, direction=direction, duration=duration)
+
+    def poco_shot_base64(self, width: int = 720):
         """
         获取屏幕截图
         :param width:
@@ -254,7 +270,8 @@ class AirtestPoco(object):
     aircv-method
     """
 
-    def crop_image(self, rect):
+    @classmethod
+    def crop_image(cls, rect):
         """局部截图
         :param rect = [x_min, y_min, x_max ,y_max].
         """

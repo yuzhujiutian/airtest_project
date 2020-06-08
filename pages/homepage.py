@@ -4,11 +4,10 @@ import sys
 
 sys.path.append('.')
 __author__ = '1084502012@qq.com'
+
 import functools
 from basic.base import *
-from common.readimg import ReadImg
-
-index_img = ReadImg('index')
+from common.readimg import index_img
 
 
 def case_name(func):
@@ -22,10 +21,21 @@ def case_name(func):
     return wrapper
 
 
+def back():
+    """后退"""
+    d.poco(resourceId='com.tencent.mm:id/q0').click()
+
+
+def home_identify():
+    """首页识别"""
+    return d.exists(index_img['运动打卡_参与排名'])
+
+
 def back_home():
     """返回首页"""
-    while not d.airtest_exists(index_img['运动打卡_参与排名']):
+    while not home_identify():
         try:
-            d.poco(resourceId='com.tencent.mm:id/q0').click()
+            back()
         except poco_error.PocoNoSuchNodeException:
             d.poco_click(text="首页")
+            d.poco_scroll(percent=-0.6)

@@ -19,6 +19,9 @@ TEST_LOG = os.path.join(BASE_DIR, 'TestCase', 'log')
 # config.ini
 INI_PATH = os.path.join(BASE_DIR, 'config', 'config.ini')
 
+# 页面数据
+YAML_PATH = os.path.join(BASE_DIR, 'page_element')
+
 # airtest_img
 AIR_IMG_PATH = os.path.join(BASE_DIR, 'airtest_img')
 

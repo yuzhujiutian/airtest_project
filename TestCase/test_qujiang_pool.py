@@ -15,16 +15,11 @@ __desc__ = """
 
 import pytest
 from basic.base import *
+from common.readimg import *
+from common.readyaml import page_data
 from tools.times import strftime
-from common.readimg import ReadImg
 from tools.reports import get_report
-from pages.homepage import back_home, case_name
-from pages.page_data import activity_list, event_registration, icon_list
-
-index_img = ReadImg('index')
-my_img = ReadImg('my')
-act_img = ReadImg('activity')
-icon_img = ReadImg('guide')
+from pages.homepage import back_home, case_name, back
 
 
 class TestQujiangPool:
@@ -88,17 +83,17 @@ class TestQujiangPool:
     def test_003(self):
         """各类活动"""
         d.poco_click(text="各类活动")
-        for i in activity_list:
+        for i in page_data['各类活动']:
             d.poco_click(text=i)
             if i == "传统文化活动":
-                assert d.poco_wait_all([d.poco(text=x) for x in activity_list[i]])
+                assert d.poco_wait_all([d.poco(text=x) for x in page_data['各类活动'][i]])
         else:
             d.assert_exists(act_img['金缘阁喜饼'])
 
     def test_004(self):
         """活动报名"""
         d.poco_click(text="活动报名")
-        assert d.poco_wait_all([d.poco(text=x) for x in event_registration])
+        assert d.poco_wait_all([d.poco(text=x) for x in page_data['活动报名']])
         d.poco_click(text='运动活动')
         d.poco_click(text='2020慢跑曲江池')
         if d.poco_exists(text='已报名'):
@@ -106,15 +101,14 @@ class TestQujiangPool:
             d.airtest_touch(act_img['关闭报名信息'])
         else:
             d.poco_click(text='立即报名')
-            air_api.text()
 
     def test_005(self):
         """测试景点icon在地图中的显示"""
         d.poco_click(text='导览')
-        d.airtest_wait(icon_img['导览首页'])
+        d.wait(index_img['导览首页'])
         results = []
-        for i in icon_list:
-            if icon_list.index(i) == 0:
+        for i in page_data['导览列表']:
+            if page_data['导览列表'].index(i) == 0:
                 continue
             else:
                 d.poco_click_pos([0.9111111111111111, 0.1388888888888889])
@@ -123,6 +117,16 @@ class TestQujiangPool:
             log(str(result))
             results.append(result)
         assert all(results), "icon查找有报错:%s" % results
+
+    def test_006(self):
+        """景区介绍"""
+        for i in page_data['景区介绍']:
+            if not d.poco_exists(text=i):
+                d.poco_scroll()
+            d.poco_click(text=i)
+            d.poco_exists(text=page_data['景区介绍'][i])
+            d.poco_click(text='商业服务')
+            back()
 
 
 if __name__ == '__main__':

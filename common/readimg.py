@@ -20,5 +20,12 @@ class ReadImg(object):
         raise FileNotFoundError("{}不存在".format(result))
 
 
+index_img = ReadImg('index')
+my_img = ReadImg('my')
+act_img = ReadImg('activity')
+icon_img = ReadImg('guide')
+
+__all__ = ['index_img', 'my_img', 'act_img', 'icon_img']
+
 if __name__ == '__main__':
     pass
