@@ -32,4 +32,4 @@ def timefmts():
 
 
 if __name__ == '__main__':
-    print(strftime())
+    print(timefmts())

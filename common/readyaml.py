@@ -7,12 +7,12 @@ __author__ = '1084502012@qq.com'
 
 import os
 import yaml
-from config import conf
+from config.conf import YAML_PATH
 
 
 class ReadYaml:
     def __init__(self, name):
-        self.path = os.path.join(conf.YAML_PATH, "{}.yaml".format(name))
+        self.path = os.path.join(YAML_PATH, "{}.yaml".format(name))
         with open(self.path, encoding='utf-8') as f:
             self.data = yaml.safe_load(f)
 

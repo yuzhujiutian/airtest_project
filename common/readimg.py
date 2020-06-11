@@ -6,12 +6,12 @@ sys.path.append('.')
 __author__ = '1084502012@qq.com'
 
 import os
-from config import conf
+from config.conf import AIR_IMG_PATH
 
 
 class ReadImg(object):
     def __init__(self, name):
-        self.path = os.path.join(conf.AIR_IMG_PATH, name)
+        self.path = os.path.join(AIR_IMG_PATH, name)
 
     def __getitem__(self, item):
         result = os.path.join(self.path, "{}.png".format(item))

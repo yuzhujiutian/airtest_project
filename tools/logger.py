@@ -8,15 +8,15 @@ __author__ = '1084502012@qq.com'
 import os
 import logging
 import datetime
-from config import conf
+from config.conf import LOG_PATH, TEST_LOG
 
 
 def log_file():
     """日志目录"""
     file_name = "{}.log".format(datetime.datetime.now().strftime("%Y%m"))
-    if not os.path.exists(conf.LOG_PATH):
-        os.makedirs(conf.LOG_PATH)
-    return os.path.join(conf.LOG_PATH, file_name)
+    if not os.path.exists(LOG_PATH):
+        os.makedirs(LOG_PATH)
+    return os.path.join(LOG_PATH, file_name)
 
 
 def init_logging():
@@ -35,8 +35,8 @@ def init_logging():
 
 def clear_log():
     """清除上一次的日志记录"""
-    for i in os.listdir(conf.TEST_LOG):
-        file = os.path.join(conf.TEST_LOG, i)
+    for i in os.listdir(TEST_LOG):
+        file = os.path.join(TEST_LOG, i)
         os.remove(file)
         print("删除：{}".format(file))
 

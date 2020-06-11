@@ -7,15 +7,15 @@ __author__ = '1084502012@qq.com'
 __all__ = ['get_report']
 
 import os
-from config import conf
 from tools.times import strftime
+from config.conf import REPORT_PATH
 from airtest.utils.compat import script_dir_name
 from airtest.report.report import LogToHtml, HTML_TPL
 
 
 def report_path():
     """报告目录"""
-    report_paths = os.path.join(conf.REPORT_PATH, "%s" % strftime())
+    report_paths = os.path.join(REPORT_PATH, "%s" % strftime())
     if not os.path.exists(report_paths):
         os.makedirs(report_paths)
     return report_paths

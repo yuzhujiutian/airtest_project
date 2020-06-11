@@ -8,6 +8,7 @@ __author__ = '1084502012@qq.com'
 import pytest
 from py._xmlgen import html
 from basic.base import *
+from basic.android_dev import android_dev
 from common.readconfig import ini
 
 
@@ -27,7 +28,7 @@ def set_session(request):
     def fn():
         d.poco_click(desc="关闭")
         air_api.stop_app(ini.package_name)
-        d.yosemite_ime_end(ini.default_ime)  # 返回至默认的键盘
+        android_dev.close_yosemite_ime(ini.default_ime)  # 返回至默认的键盘
         log("结束测试！")
 
     request.addfinalizer(fn)

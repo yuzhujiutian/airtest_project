@@ -8,7 +8,7 @@ __all__ = ['ini']
 
 import os
 import configparser
-import config.conf as cfg
+from config.conf import INI_PATH
 
 APP = "APP"
 package = "package"
@@ -18,11 +18,10 @@ default_ime = "default_ime"
 
 class ReadConfig(object):
     def __init__(self):
-        self.path = cfg.INI_PATH
-        if not os.path.exists(self.path):
-            raise FileNotFoundError("配置文件{}不存在！".format(self.path))
+        if not os.path.exists(INI_PATH):
+            raise FileNotFoundError("配置文件{}不存在！".format(INI_PATH))
         self.config = configparser.RawConfigParser()
-        self.config.read(self.path, encoding='utf-8')
+        self.config.read(INI_PATH, encoding='utf-8')
 
     def _get(self, section, option):
         return self.config.get(section, option)

@@ -6,16 +6,15 @@ sys.path.append('.')
 __author__ = '1084502012@qq.com'
 __all__ = ['d', 'log', 'air_api', 'air_error', 'poco_error']
 
-from config import conf
+from config.conf import TEST_LOG
 from tools.logger import clear_log
 from tools.logger import init_logging
 from airtest.aircv import crop_image
 from airtest.core import api as air_api
 from airtest.core.helper import set_logdir, log
-from airtest.core.android.android import Android
-from airtest.core.android.constant import YOSEMITE_IME_SERVICE
-from poco.drivers.android.uiautomation import AndroidUiautomationPoco
+from android_dev import android_dev
 from poco.proxy import UIObjectProxy
+from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 # exceptions
 from airtest.core import error as air_error
 from poco import exceptions as poco_error
@@ -37,12 +36,12 @@ class AirtestPoco(object):
         # 删除旧日志
         clear_log()
         # 设置全局日志目录
-        set_logdir(conf.TEST_LOG)
-        log("设置全局日志目录：%s" % conf.TEST_LOG)
+        set_logdir(TEST_LOG)
+        log("设置全局日志目录：%s" % TEST_LOG)
         # # 初始化日志
         init_logging()
-        self.android = Android()
-        self.poco = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
+        self.poco = AndroidUiautomationPoco(
+            use_airtest_input=True, screenshot_each_action=False)
         self.UIObj = UIObjectProxy(poco=self.poco)
         self.timeout = air_api.ST.FIND_TIMEOUT  # 等待显示时间
 
@@ -59,7 +58,8 @@ class AirtestPoco(object):
         :param img_name: 图片名称
         :return:
         """
-        temp = air_api.Template(r"%s" % img_name, rgb=rgb, record_pos=record_pos, resolution=d.screen)
+        temp = air_api.Template(
+            r"%s" % img_name, rgb=rgb, record_pos=record_pos, resolution=android_dev.screen)
         return temp
 
     def touch(self, v, **kwargs):
@@ -253,7 +253,8 @@ class AirtestPoco(object):
         :param duration: 百分比：根据
         :param percent: 持续时间：执行操作的时间间隔
         """
-        self.poco.scroll(direction=direction, percent=percent, duration=duration)
+        self.poco.scroll(direction=direction,
+                         percent=percent, duration=duration)
 
     def poco_swipe(self, p1, p2=None, direction=None, duration: float = 2.0):
         """
@@ -297,34 +298,8 @@ class AirtestPoco(object):
         crop_screen = crop_image(img, rect)  # 局部截图
         air_api.try_log_screen(crop_screen)  # 保存局部截图到logs文件夹中
 
-    """
-    设备相关
-    """
-
-    @property
-    def device_id(self):
-        """当前设备ID"""
-        return self.android.uuid
-
-    @property
-    def screen(self):
-        """获取屏幕宽高"""
-        info = self.android.display_info
-        return info.get('width'), info.get('height')
-
-    @property
-    def get_top_activity(self):
-        """获取顶级活动"""
-        return self.android.get_top_activity()
-
-    def yosemite_ime_end(self, ime):
-        """关闭airtest输入法"""
-        self.android.adb.shell("ime disable %s" % YOSEMITE_IME_SERVICE)
-        self.android.adb.shell("ime set %s" % ime)
-
 
 d = AirtestPoco()
 
 if __name__ == '__main__':
-    print(d.get_top_activity)
-    print(d.screen)
+    print(d)
