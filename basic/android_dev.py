@@ -39,6 +39,13 @@ class AndroidDev:
         """获取默认的输入法"""
         return self.adb.shell("settings get secure default_input_method").strip()
 
+    @property
+    def get_ipv4(self):
+        """[summary]
+        获取手机的IP地址
+        """
+        return self.android.get_ip_address()
+
     def close_yosemite_ime(self, ime):
         """关闭airtest输入法"""
         self.adb.shell("ime disable %s" % YOSEMITE_IME_SERVICE)
@@ -49,4 +56,4 @@ android_dev = AndroidDev()
 __all__ = ['android_dev']
 
 if __name__ == '__main__':
-    print(android_dev.get_default_ime)
+    print(android_dev.close_yosemite_ime("com.sohu.inputmethod.sogou/.SogouIME"))
