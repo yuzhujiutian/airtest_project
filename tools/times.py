@@ -16,9 +16,9 @@ def timestamp():
     return time.time()
 
 
-def strftime(fmt="%Y%m%d-%H%M%S"):
+def strftime(fmt="%Y%m%d%H%M%S"):
     """格式化时间"""
-    return time.strftime(fmt, time.localtime(time.time()))
+    return time.strftime(fmt, time.localtime())
 
 
 def now_time():
@@ -32,4 +32,4 @@ def timefmts():
 
 
 if __name__ == '__main__':
-    print(timefmts())
+    print(strftime())

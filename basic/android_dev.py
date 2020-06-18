@@ -56,4 +56,4 @@ android_dev = AndroidDev()
 __all__ = ['android_dev']
 
 if __name__ == '__main__':
-    print(android_dev.close_yosemite_ime("com.sohu.inputmethod.sogou/.SogouIME"))
+    print(android_dev.device_id)

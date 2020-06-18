@@ -6,13 +6,17 @@ sys.path.append('.')
 __author__ = '1084502012@qq.com'
 __all__ = ['d', 'log', 'air_api', 'air_error', 'poco_error']
 
+import os
+import allure
+import base64
 from config.conf import TEST_LOG
 from tools.logger import clear_log
 from tools.logger import init_logging
 from airtest.aircv import crop_image
 from airtest.core import api as air_api
 from airtest.core.helper import set_logdir, log
-from android_dev import android_dev
+from airtest.core.cv import Template
+from basic.android_dev import android_dev
 from poco.proxy import UIObjectProxy
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 # exceptions
@@ -51,7 +55,7 @@ class AirtestPoco(object):
     """
 
     @classmethod
-    def template(cls, img_name: str, rgb: bool = True, record_pos: tuple = (0.5, -0.5)):
+    def temp(cls, img_name: str, rgb: bool = True, record_pos: tuple = (0.5, -0.5)):
         """CV识别主函数
         :param rgb: 灰度识别还是色彩识别
         :param record_pos: 图片坐标
@@ -62,17 +66,17 @@ class AirtestPoco(object):
             r"%s" % img_name, rgb=rgb, record_pos=record_pos, resolution=android_dev.screen)
         return temp
 
-    def touch(self, v, **kwargs):
+    def touch(self, v: Template, **kwargs):
         """
         在设备屏幕上执行触摸操作
         :param v: 要触摸的目标，可以是Template实例，也可以是绝对坐标（x，y）
         :param kwargs: [times  要执行多少次触摸]
         """
-        air_api.touch(self.template(v), **kwargs)
+        air_api.touch(v, **kwargs)
 
-    def double_click(self, v: str):
+    def double_click(self, v: Template):
         """双击"""
-        air_api.double_click(self.template(v))
+        air_api.double_click(v)
 
     def swipe(self, v1, v2=None, vector=None, **kwargs):
         """
@@ -89,12 +93,12 @@ class AirtestPoco(object):
         :return: 原点位置和目标位置
         """
         if v1.endswith('.png'):
-            v1 = self.template(v1)
+            v1 = self.temp(v1)
         if v2.endswith('.png'):
-            v2 = self.template(v2)
+            v2 = self.temp(v2)
         return air_api.swipe(v1, v2, vector, **kwargs)
 
-    def wait(self, v: str, **kwargs):
+    def wait(self, v: Template, **kwargs):
         """
         等待与设备屏幕上的模板匹配
         :param v –等待的目标对象，模板实例
@@ -102,40 +106,52 @@ class AirtestPoco(object):
         :param interval –尝试找到匹配项的时间间隔（以秒为单位）
         :param intervalfunc –在每次未成功尝试找到相应匹配项后调用
         """
-        air_api.wait(self.template(v), **kwargs)
+        air_api.wait(v, **kwargs)
 
-    def exists(self, v: str):
+    def exists(self, v: Template):
         """
         检查设备屏幕上是否存在给定目标
         :param v –检查对象
         :return 如果找不到目标，则为False，否则返回目标的坐标
         """
-        return air_api.exists(self.template(v))
+        return air_api.exists(v)
 
-    def assert_exists(self, v: str, msg: str = None):
+    def assert_exists(self, v: Template, msg: str = None):
         """
         断言目标存在于设备屏幕上
         :param v –要检查的目标
         :param msg –断言的简短描述，它将记录在报告中
         """
-        air_api.assert_exists(self.template(v), msg)
+        air_api.assert_exists(v, msg)
 
-    def assert_not_exists(self, v: str, msg: str = None):
+    def assert_not_exists(self, v: Template, msg: str = None):
         """
         断言目标在设备屏幕上不存在
         :param v –要检查的目标
         :param msg –断言的简短描述，它将记录在报告中
         """
-        air_api.assert_not_exists(self.template(v), msg)
+        air_api.assert_not_exists(v, msg)
 
-    def find_all(self, v: str):
+    def find_all(self, v: Template):
         """
         在设备屏幕上查找目标的所有位置并返回其坐标
         :param v:要查找的目标
         :return:坐标列表，[（x，y），（x1，y1），…]
         :平台：Android、Windows、iOS
         """
-        return air_api.find_all(self.template(v))
+        return air_api.find_all(v)
+
+    def capture_screenshot(self):
+        """
+        截图保存为base64
+        :return:
+        """
+        filename = air_api.try_log_screen()['screen']
+        filepath = os.path.join(TEST_LOG, filename)
+        allure.attach.file(filepath, "异常截图..." + filename, allure.attachment_type.JPG)
+        with open(filepath, 'rb') as f:
+            imagebase64 = base64.b64encode(f.read())
+        return imagebase64.decode()
 
     """
     poco-method
@@ -183,7 +199,6 @@ class AirtestPoco(object):
         """
         log("点击元素：{}".format(kwargs))
         self.poco_obj(**kwargs).click()
-        self.poco.wait_stable()
 
     def poco_click_pos(self, pos):
         """
@@ -227,8 +242,7 @@ class AirtestPoco(object):
     def poco_freeze(self, **kwargs):
         """冻结UI树并返回当前的UI结果树"""
         with self.poco.freeze() as freeze:
-            dump = freeze(**kwargs)
-        return dump
+            return freeze(**kwargs)
 
     def poco_hierarchy_dict(self):
         """获取当前结构树的字典"""
@@ -272,18 +286,6 @@ class AirtestPoco(object):
         :param duration: 持续时间（float）–执行滑动操作的时间间隔
         """
         self.poco.swipe(p1=p1, p2=p2, direction=direction, duration=duration)
-
-    def poco_shot_base64(self, width: int = 720):
-        """
-        获取屏幕截图
-        :param width:
-        :return:
-                2-tuple:
-                    - screen_shot (:obj:`str/bytes`): base64 encoded screenshot data
-                    - format (:obj:`str`): output format 'png', 'jpg', etc.
-        """
-        base64, _ = self.poco.snapshot(width=width)
-        return base64
 
     """
     aircv-method

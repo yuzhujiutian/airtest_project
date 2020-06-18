@@ -28,5 +28,8 @@ AIR_IMG_PATH = os.path.join(BASE_DIR, 'airtest_img')
 # report_path
 REPORT_PATH = os.path.join(BASE_DIR, "report")
 
+# ALLURE_DIR
+ALLURE_DIR = os.path.join(BASE_DIR, 'allure_report')
+
 if __name__ == '__main__':
     print(BASE_DIR)
