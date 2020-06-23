@@ -25,11 +25,17 @@ YAML_PATH = os.path.join(BASE_DIR, 'page_element')
 # airtest_img
 AIR_IMG_PATH = os.path.join(BASE_DIR, 'airtest_img')
 
+# 测试用例
+TEST_CASE = os.path.join(BASE_DIR, 'TestCase')
+
 # report_path
 REPORT_PATH = os.path.join(BASE_DIR, "report")
 
+# ALLURE_RAW_RESULTS
+ALLURE_RESULTS = os.path.join(BASE_DIR, 'allure-results')
+
 # ALLURE_DIR
-ALLURE_DIR = os.path.join(BASE_DIR, 'allure_report')
+ALLURE_REPORT = os.path.join(BASE_DIR, 'allure-report')
 
 if __name__ == '__main__':
     print(BASE_DIR)

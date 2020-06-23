@@ -4,7 +4,7 @@ import sys
 
 sys.path.append('.')
 __author__ = '1084502012@qq.com'
-__all__ = ['d', 'log', 'air_api', 'air_error', 'poco_error']
+__all__ = ['d', 'log', 'airtest_api', 'air_error', 'poco_error']
 
 import os
 import allure
@@ -13,7 +13,7 @@ from config.conf import TEST_LOG
 from tools.logger import clear_log
 from tools.logger import init_logging
 from airtest.aircv import crop_image
-from airtest.core import api as air_api
+from airtest.core import api as airtest_api
 from airtest.core.helper import set_logdir, log
 from airtest.core.cv import Template
 from basic.android_dev import android_dev
@@ -28,7 +28,7 @@ class AirtestPoco(object):
     """
     Airtest和Poco的方法集合
     airtest-api
-        air_api,methods
+        airtest_api,methods
     poco-Selector
         text, textMatches
     """
@@ -47,7 +47,7 @@ class AirtestPoco(object):
         self.poco = AndroidUiautomationPoco(
             use_airtest_input=True, screenshot_each_action=False)
         self.UIObj = UIObjectProxy(poco=self.poco)
-        self.timeout = air_api.ST.FIND_TIMEOUT  # 等待显示时间
+        self.timeout = airtest_api.ST.FIND_TIMEOUT  # 等待显示时间
 
     """
     AirTest-Method
@@ -62,7 +62,7 @@ class AirtestPoco(object):
         :param img_name: 图片名称
         :return:
         """
-        temp = air_api.Template(
+        temp = airtest_api.Template(
             r"%s" % img_name, rgb=rgb, record_pos=record_pos, resolution=android_dev.screen)
         return temp
 
@@ -72,11 +72,11 @@ class AirtestPoco(object):
         :param v: 要触摸的目标，可以是Template实例，也可以是绝对坐标（x，y）
         :param kwargs: [times  要执行多少次触摸]
         """
-        air_api.touch(v, **kwargs)
+        airtest_api.touch(v, **kwargs)
 
     def double_click(self, v: Template):
         """双击"""
-        air_api.double_click(v)
+        airtest_api.double_click(v)
 
     def swipe(self, v1, v2=None, vector=None, **kwargs):
         """
@@ -96,7 +96,7 @@ class AirtestPoco(object):
             v1 = self.temp(v1)
         if v2.endswith('.png'):
             v2 = self.temp(v2)
-        return air_api.swipe(v1, v2, vector, **kwargs)
+        return airtest_api.swipe(v1, v2, vector, **kwargs)
 
     def wait(self, v: Template, **kwargs):
         """
@@ -106,7 +106,7 @@ class AirtestPoco(object):
         :param interval –尝试找到匹配项的时间间隔（以秒为单位）
         :param intervalfunc –在每次未成功尝试找到相应匹配项后调用
         """
-        air_api.wait(v, **kwargs)
+        airtest_api.wait(v, **kwargs)
 
     def exists(self, v: Template):
         """
@@ -114,7 +114,7 @@ class AirtestPoco(object):
         :param v –检查对象
         :return 如果找不到目标，则为False，否则返回目标的坐标
         """
-        return air_api.exists(v)
+        return airtest_api.exists(v)
 
     def assert_exists(self, v: Template, msg: str = None):
         """
@@ -122,7 +122,7 @@ class AirtestPoco(object):
         :param v –要检查的目标
         :param msg –断言的简短描述，它将记录在报告中
         """
-        air_api.assert_exists(v, msg)
+        airtest_api.assert_exists(v, msg)
 
     def assert_not_exists(self, v: Template, msg: str = None):
         """
@@ -130,7 +130,7 @@ class AirtestPoco(object):
         :param v –要检查的目标
         :param msg –断言的简短描述，它将记录在报告中
         """
-        air_api.assert_not_exists(v, msg)
+        airtest_api.assert_not_exists(v, msg)
 
     def find_all(self, v: Template):
         """
@@ -139,14 +139,14 @@ class AirtestPoco(object):
         :return:坐标列表，[（x，y），（x1，y1），…]
         :平台：Android、Windows、iOS
         """
-        return air_api.find_all(v)
+        return airtest_api.find_all(v)
 
     def capture_screenshot(self):
         """
         截图保存为base64
         :return:
         """
-        filename = air_api.try_log_screen()['screen']
+        filename = airtest_api.try_log_screen()['screen']
         filepath = os.path.join(TEST_LOG, filename)
         allure.attach.file(filepath, "异常截图..." + filename, allure.attachment_type.JPG)
         with open(filepath, 'rb') as f:
@@ -296,9 +296,9 @@ class AirtestPoco(object):
         """局部截图
         :param rect = [x_min, y_min, x_max ,y_max].
         """
-        img = air_api.G.DEVICE.snapshot()
+        img = airtest_api.G.DEVICE.snapshot()
         crop_screen = crop_image(img, rect)  # 局部截图
-        air_api.try_log_screen(crop_screen)  # 保存局部截图到logs文件夹中
+        airtest_api.try_log_screen(crop_screen)  # 保存局部截图到logs文件夹中
 
 
 d = AirtestPoco()

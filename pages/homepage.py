@@ -14,7 +14,6 @@ def back():
     d.poco_click(name='com.tencent.mm:id/da')
 
 
-
 def home_identify():
     """首页识别"""
     return d.exists(d.temp(index_img['运动打卡_参与排名']))

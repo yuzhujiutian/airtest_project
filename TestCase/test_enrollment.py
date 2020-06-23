@@ -28,6 +28,8 @@ class TestEnrollment:
         if d.poco_exists(text='已报名'):
             d.poco_click(text='查看报名信息')
             d.touch(d.temp(act_img['关闭报名信息']))
+        elif d.poco_exists(text="该活动已结束"):
+            print("活动已结束")
         else:
             d.poco_click(text='立即报名')
 

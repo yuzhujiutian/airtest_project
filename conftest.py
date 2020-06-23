@@ -22,15 +22,15 @@ def set_session(request):
     """
     allure.step("开始测试！")
     log(android_dev.device_id)
-    air_api.wake()
-    air_api.start_app(ini.package_name)
+    airtest_api.wake()
+    airtest_api.start_app(ini.package_name)
     d.poco_click(text="发现")
     d.poco_click(text="小程序")
     d.poco_click(text="西安曲江池遗址公园")
 
     def fn():
         d.poco_click(desc="关闭")
-        air_api.stop_app(ini.package_name)
+        airtest_api.stop_app(ini.package_name)
         android_dev.close_yosemite_ime(ini.default_ime)  # 返回至默认的键盘
         allure.step("结束测试！")
 

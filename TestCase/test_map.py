@@ -18,11 +18,11 @@ from common.readyaml import page_data
 class TestMap:
     """导览地图"""
 
-    @allure.story("测试景点icon在地图中的显示")
-    def test_005(self):
+    @allure.title("测试景点icon在地图中的显示")
+    def test_001(self):
         """测试景点icon在地图中的显示"""
         d.poco_click(text='导览')
-        d.wait(d.temp(index_img['导览首页']))
+        d.wait(d.temp(index_img['导览首页'], record_pos=(0.398, 0.261)))
         results = []
         for i in page_data['导览列表']:
             if page_data['导览列表'].index(i) == 0:
@@ -35,6 +35,10 @@ class TestMap:
             results.append(result)
         with assume:
             assert all(results), "icon查找有报错:%s" % results
+
+    def test_002(self):
+        """测试景点列表的滑动"""
+        pass
 
 
 if __name__ == '__main__':
