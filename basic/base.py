@@ -12,11 +12,15 @@ import base64
 from config.conf import TEST_LOG
 from tools.logger import clear_log
 from tools.logger import init_logging
-from airtest.aircv import crop_image
-from airtest.core import api as airtest_api
-from airtest.core.helper import set_logdir, log
+
 from airtest.core.cv import Template
+from airtest.core import api as airtest_api
+from airtest.core.settings import Settings as ST
+from airtest.core.helper import G, set_logdir, log
+
+from airtest.aircv import crop_image
 from basic.android_dev import android_dev
+
 from poco.proxy import UIObjectProxy
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 # exceptions
@@ -141,7 +145,7 @@ class AirtestPoco(object):
         """
         return airtest_api.find_all(v)
 
-    def capture_screenshot(self):
+    def capture_screenshot(self, bs64=True):
         """
         截图保存为base64
         :return:
@@ -149,9 +153,10 @@ class AirtestPoco(object):
         filename = airtest_api.try_log_screen()['screen']
         filepath = os.path.join(TEST_LOG, filename)
         allure.attach.file(filepath, "异常截图..." + filename, allure.attachment_type.JPG)
-        with open(filepath, 'rb') as f:
-            imagebase64 = base64.b64encode(f.read())
-        return imagebase64.decode()
+        if bs64:
+            with open(filepath, 'rb') as f:
+                imagebase64 = base64.b64encode(f.read())
+            return imagebase64.decode()
 
     """
     poco-method

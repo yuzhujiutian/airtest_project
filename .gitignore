@@ -143,4 +143,5 @@ cython_debug/
 .idea/
 log/
 report/
-allure_report/
+allure-report/
+allure-results/
