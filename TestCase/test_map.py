@@ -49,14 +49,17 @@ class TestMap:
             d.poco_scroll()
         d.touch(d.temp(icon_img["关闭景点列表"], record_pos=(-0.291, -0.025)))
 
+    @allure.story("放大缩小地图")
     def test_003(self):
-        """放大缩小地图"""
-        for _ in range(3):
+        """放大缩小地图、定位按钮"""
+        for _ in range(5):
             d.poco_click_pos([0.9009259259259259, 0.7402777777777778])
             d.capture_screenshot(bs64=False)
-        for _ in range(5):
+        for _ in range(10):
             d.poco_click_pos([0.9009259259259259, 0.812962962962963])
             d.capture_screenshot(bs64=False)
+        d.poco_click_pos([0.09814814814814815, 0.812962962962963])
+        d.capture_screenshot(bs64=False)
 
 
 if __name__ == '__main__':
