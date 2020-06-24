@@ -78,6 +78,18 @@ class AirtestPoco(object):
         """
         airtest_api.touch(v, **kwargs)
 
+    def text(self, text, enter=True, **kwargs):
+        """
+        目标设备上的输入文本。文本输入部件必须首先是活动的。
+        :param text: 输入文本，支持unicode
+        :param enter:输入' enter '键事件后文本输入，默认为真
+        :param kwargs:
+        :return:
+        :platforms: Android, Windows, iOS
+        """
+        airtest_api.text(text, enter=enter, **kwargs)
+        sleep()
+
     def double_click(self, v: Template):
         """双击"""
         airtest_api.double_click(v)
@@ -152,7 +164,8 @@ class AirtestPoco(object):
         """
         filename = airtest_api.try_log_screen()['screen']
         filepath = os.path.join(TEST_LOG, filename)
-        allure.attach.file(filepath, "异常截图..." + filename, allure.attachment_type.JPG)
+        allure.attach.file(filepath, "异常截图..." + filename,
+                           allure.attachment_type.JPG)
         if bs64:
             with open(filepath, 'rb') as f:
                 imagebase64 = base64.b64encode(f.read())
