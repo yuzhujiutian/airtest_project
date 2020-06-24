@@ -24,6 +24,6 @@ def back_home():
     while not home_identify():
         try:
             back()
-        except poco_error.PocoTargetTimeout:
+        except poco_exception.PocoTargetTimeout:
             d.poco_click(text="首页")
             d.poco_scroll(percent=-0.6)

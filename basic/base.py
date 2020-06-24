@@ -4,7 +4,7 @@ import sys
 
 sys.path.append('.')
 __author__ = '1084502012@qq.com'
-__all__ = ['d', 'log', 'airtest_api', 'air_error', 'poco_error']
+__all__ = ['d', 'G', 'ST', 'log', 'airtest_exception', 'poco_exception']
 
 import os
 import allure
@@ -13,8 +13,9 @@ from config.conf import TEST_LOG
 from tools.logger import clear_log
 from tools.logger import init_logging
 
+from airtest.core import api
 from airtest.core.cv import Template
-from airtest.core import api as airtest_api
+from airtest.utils.transform import TargetPos
 from airtest.core.settings import Settings as ST
 from airtest.core.helper import G, set_logdir, log
 
@@ -24,15 +25,15 @@ from basic.android_dev import android_dev
 from poco.proxy import UIObjectProxy
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 # exceptions
-from airtest.core import error as air_error
-from poco import exceptions as poco_error
+from airtest.core import error as airtest_exception
+from poco import exceptions as poco_exception
 
 
 class AirtestPoco(object):
     """
     Airtest和Poco的方法集合
     airtest-api
-        airtest_api,methods
+        self.api,methods
     poco-Selector
         text, textMatches
     """
@@ -48,10 +49,12 @@ class AirtestPoco(object):
         log("设置全局日志目录：%s" % TEST_LOG)
         # # 初始化日志
         init_logging()
+
+        self.api = api  # airtest-api
         self.poco = AndroidUiautomationPoco(
             use_airtest_input=True, screenshot_each_action=False)
         self.UIObj = UIObjectProxy(poco=self.poco)
-        self.timeout = airtest_api.ST.FIND_TIMEOUT  # 等待显示时间
+        self.timeout = ST.FIND_TIMEOUT  # 等待显示时间
 
     """
     AirTest-Method
@@ -59,15 +62,18 @@ class AirtestPoco(object):
     """
 
     @classmethod
-    def temp(cls, img_name: str, rgb: bool = True, record_pos: tuple = (0.5, -0.5)):
+    def temp(cls, img_name: str, rgb: bool = True, record_pos: tuple = (0.5, -0.5),
+             resolution: tuple = android_dev.screen, target_pos=TargetPos.MID):
         """CV识别主函数
         :param rgb: 灰度识别还是色彩识别
         :param record_pos: 图片坐标
         :param img_name: 图片名称
+        :param target_pos:
+        :param resolution: 设备分辨率
         :return:
         """
-        temp = airtest_api.Template(
-            r"%s" % img_name, rgb=rgb, record_pos=record_pos, resolution=android_dev.screen)
+        temp = Template(
+            r"%s" % img_name, target_pos=target_pos, record_pos=record_pos, resolution=resolution, rgb=rgb)
         return temp
 
     def touch(self, v: Template, **kwargs):
@@ -76,7 +82,7 @@ class AirtestPoco(object):
         :param v: 要触摸的目标，可以是Template实例，也可以是绝对坐标（x，y）
         :param kwargs: [times  要执行多少次触摸]
         """
-        airtest_api.touch(v, **kwargs)
+        self.api.touch(v, **kwargs)
 
     def text(self, text, enter=True, **kwargs):
         """
@@ -87,12 +93,12 @@ class AirtestPoco(object):
         :return:
         :platforms: Android, Windows, iOS
         """
-        airtest_api.text(text, enter=enter, **kwargs)
-        sleep()
+        self.api.text(text, enter=enter, **kwargs)
+        self.api.sleep()
 
     def double_click(self, v: Template):
         """双击"""
-        airtest_api.double_click(v)
+        self.api.double_click(v)
 
     def swipe(self, v1, v2=None, vector=None, **kwargs):
         """
@@ -112,7 +118,7 @@ class AirtestPoco(object):
             v1 = self.temp(v1)
         if v2.endswith('.png'):
             v2 = self.temp(v2)
-        return airtest_api.swipe(v1, v2, vector, **kwargs)
+        return self.api.swipe(v1, v2, vector, **kwargs)
 
     def wait(self, v: Template, **kwargs):
         """
@@ -122,7 +128,7 @@ class AirtestPoco(object):
         :param interval –尝试找到匹配项的时间间隔（以秒为单位）
         :param intervalfunc –在每次未成功尝试找到相应匹配项后调用
         """
-        airtest_api.wait(v, **kwargs)
+        self.api.wait(v, **kwargs)
 
     def exists(self, v: Template):
         """
@@ -130,7 +136,7 @@ class AirtestPoco(object):
         :param v –检查对象
         :return 如果找不到目标，则为False，否则返回目标的坐标
         """
-        return airtest_api.exists(v)
+        return self.api.exists(v)
 
     def assert_exists(self, v: Template, msg: str = None):
         """
@@ -138,7 +144,7 @@ class AirtestPoco(object):
         :param v –要检查的目标
         :param msg –断言的简短描述，它将记录在报告中
         """
-        airtest_api.assert_exists(v, msg)
+        self.api.assert_exists(v, msg)
 
     def assert_not_exists(self, v: Template, msg: str = None):
         """
@@ -146,7 +152,7 @@ class AirtestPoco(object):
         :param v –要检查的目标
         :param msg –断言的简短描述，它将记录在报告中
         """
-        airtest_api.assert_not_exists(v, msg)
+        self.api.assert_not_exists(v, msg)
 
     def find_all(self, v: Template):
         """
@@ -155,14 +161,14 @@ class AirtestPoco(object):
         :return:坐标列表，[（x，y），（x1，y1），…]
         :平台：Android、Windows、iOS
         """
-        return airtest_api.find_all(v)
+        return self.api.find_all(v)
 
     def capture_screenshot(self, bs64=True):
         """
         截图保存为base64
         :return:
         """
-        filename = airtest_api.try_log_screen()['screen']
+        filename = self.api.try_log_screen()['screen']
         filepath = os.path.join(TEST_LOG, filename)
         allure.attach.file(filepath, "异常截图..." + filename,
                            allure.attachment_type.JPG)
@@ -175,7 +181,7 @@ class AirtestPoco(object):
     poco-method
     """
 
-    def poco_wait_any(self, objects):
+    def poco_wait_any(self, objects: list):
         """
         等待，直到所有给定的一个 UI 代理在超时之前显示。将定期轮询所有 UI 代理。
         :param objects:
@@ -183,10 +189,10 @@ class AirtestPoco(object):
         """
         try:
             return self.poco.wait_for_any(objects, timeout=self.timeout)
-        except poco_error.PocoTargetTimeout:
+        except poco_exception.PocoTargetTimeout:
             return False
 
-    def poco_wait_all(self, objects):
+    def poco_wait_all(self, objects: list):
         """
         等待，直到所有给定的所有 UI 代理在超时之前显示。将定期轮询所有 UI 代理。
         :param objects:
@@ -195,7 +201,7 @@ class AirtestPoco(object):
         try:
             self.poco.wait_for_all(objects, timeout=self.timeout)
             return True
-        except poco_error.PocoTargetTimeout:
+        except poco_exception.PocoTargetTimeout:
             return False
 
     def poco_obj(self, **kwargs):
@@ -277,7 +283,7 @@ class AirtestPoco(object):
         log("元素{}验证结果: {}".format(kwargs, result))
         return result
 
-    def poco_scroll(self, direction='vertical', percent=0.5, duration=2.0):
+    def poco_scroll(self, direction: str = 'vertical', percent: float = 0.5, duration: float = 2.0):
         """
         从整个屏幕的下部滚动到上部
         默认的 direction='vertical', percent=0.6, duration=2.0
@@ -309,14 +315,13 @@ class AirtestPoco(object):
     aircv-method
     """
 
-    @classmethod
-    def crop_image(cls, rect):
+    def crop_image(self, rect: list):
         """局部截图
         :param rect = [x_min, y_min, x_max ,y_max].
         """
-        img = airtest_api.G.DEVICE.snapshot()
+        img = G.DEVICE.snapshot()
         crop_screen = crop_image(img, rect)  # 局部截图
-        airtest_api.try_log_screen(crop_screen)  # 保存局部截图到logs文件夹中
+        self.api.try_log_screen(crop_screen)  # 保存局部截图到logs文件夹中
 
 
 d = AirtestPoco()

@@ -7,18 +7,7 @@ __author__ = '1084502012@qq.com'
 
 import os
 import shutil
-from config.conf import ALLURE_RESULTS, ALLURE_REPORT, REPORT_PATH
-
-
-def copy_history():
-    start_path = os.path.join(ALLURE_REPORT, 'history')
-    end_path = os.path.join(ALLURE_RESULTS, 'history')
-    if os.path.exists(end_path):
-        shutil.rmtree(end_path)
-    try:
-        shutil.copytree(start_path, end_path)
-    except FileNotFoundError:
-        print("allure-results上一次历史数据不存在！")
+from config.conf import ALLURE_RESULTS, REPORT_PATH
 
 
 def clear_allure():
@@ -50,4 +39,3 @@ def clear_airtest_report():
 
 if __name__ == '__main__':
     clear_allure()
-    copy_history()
