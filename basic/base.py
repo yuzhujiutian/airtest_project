@@ -9,7 +9,10 @@ __all__ = ['d', 'G', 'ST', 'log', 'airtest_exception', 'poco_exception']
 import os
 import allure
 import base64
+import pytesseract
+from PIL import Image
 from config.conf import TEST_LOG
+from tools.times import timestamp
 from tools.logger import clear_log
 from tools.logger import init_logging
 
@@ -19,8 +22,8 @@ from airtest.utils.transform import TargetPos
 from airtest.core.settings import Settings as ST
 from airtest.core.helper import G, set_logdir, log
 
-from airtest.aircv import crop_image
 from basic.android_dev import android_dev
+from airtest.aircv import crop_image, cv2_2_pil
 
 from poco.proxy import UIObjectProxy
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
@@ -76,6 +79,7 @@ class AirtestPoco(object):
             r"%s" % img_name, target_pos=target_pos, record_pos=record_pos, resolution=resolution, rgb=rgb)
         return temp
 
+    @allure.step("元素点击：")
     def touch(self, v: Template, **kwargs):
         """
         在设备屏幕上执行触摸操作
@@ -84,6 +88,7 @@ class AirtestPoco(object):
         """
         self.api.touch(v, **kwargs)
 
+    @allure.step("输入文本：")
     def text(self, text, enter=True, **kwargs):
         """
         目标设备上的输入文本。文本输入部件必须首先是活动的。
@@ -96,10 +101,12 @@ class AirtestPoco(object):
         self.api.text(text, enter=enter, **kwargs)
         self.api.sleep()
 
+    @allure.step("双击元素：")
     def double_click(self, v: Template):
         """双击"""
         self.api.double_click(v)
 
+    @allure.step("滑动元素：")
     def swipe(self, v1, v2=None, vector=None, **kwargs):
         """
         在设备屏幕上执行滑动操作。
@@ -120,6 +127,7 @@ class AirtestPoco(object):
             v2 = self.temp(v2)
         return self.api.swipe(v1, v2, vector, **kwargs)
 
+    @allure.step("等待元素：")
     def wait(self, v: Template, **kwargs):
         """
         等待与设备屏幕上的模板匹配
@@ -130,6 +138,7 @@ class AirtestPoco(object):
         """
         self.api.wait(v, **kwargs)
 
+    @allure.step("元素存在：")
     def exists(self, v: Template):
         """
         检查设备屏幕上是否存在给定目标
@@ -138,6 +147,7 @@ class AirtestPoco(object):
         """
         return self.api.exists(v)
 
+    @allure.step("断言目标存在：")
     def assert_exists(self, v: Template, msg: str = None):
         """
         断言目标存在于设备屏幕上
@@ -146,6 +156,7 @@ class AirtestPoco(object):
         """
         self.api.assert_exists(v, msg)
 
+    @allure.step("断言目标不存在：")
     def assert_not_exists(self, v: Template, msg: str = None):
         """
         断言目标在设备屏幕上不存在
@@ -154,6 +165,7 @@ class AirtestPoco(object):
         """
         self.api.assert_not_exists(v, msg)
 
+    @allure.step("查找所有匹配的：")
     def find_all(self, v: Template):
         """
         在设备屏幕上查找目标的所有位置并返回其坐标
@@ -181,6 +193,7 @@ class AirtestPoco(object):
     poco-method
     """
 
+    @allure.step("poco等待一个元素显示：")
     def poco_wait_any(self, objects: list):
         """
         等待，直到所有给定的一个 UI 代理在超时之前显示。将定期轮询所有 UI 代理。
@@ -192,6 +205,7 @@ class AirtestPoco(object):
         except poco_exception.PocoTargetTimeout:
             return False
 
+    @allure.step("poco等待多个元素显示：")
     def poco_wait_all(self, objects: list):
         """
         等待，直到所有给定的所有 UI 代理在超时之前显示。将定期轮询所有 UI 代理。
@@ -214,6 +228,7 @@ class AirtestPoco(object):
         ele.wait_for_appearance(timeout=self.timeout)
         return ele
 
+    @allure.step("poco点击元素：")
     def poco_click(self, **kwargs):
         """
         对由UI代理表示的UI元素执行click操作。如果这个UI代理代表一组
@@ -223,7 +238,9 @@ class AirtestPoco(object):
         """
         log("点击元素：{}".format(kwargs))
         self.poco_obj(**kwargs).click()
+        self.poco.sleep_for_polling_interval()
 
+    @allure.step("poco点击pos：")
     def poco_click_pos(self, pos):
         """
         在给定坐标下对目标设备执行单击(触摸，轻击等)操作。坐标(x, y)是一个2-列表或2-元组。
@@ -238,7 +255,9 @@ class AirtestPoco(object):
         :return:
         """
         self.poco.click(pos)
+        self.poco.sleep_for_polling_interval()
 
+    @allure.step("poco获取元素文本：")
     def poco_text(self, **kwargs):
         """
         获取 UI 元素的文本属性。如果没有此类属性，则返回"无"。
@@ -249,6 +268,7 @@ class AirtestPoco(object):
         log("获取元素{}文本：{}".format(kwargs, txt))
         return txt
 
+    @allure.step("poco获取元素属性：")
     def poco_attr(self, name, **kwargs):
         """
         按给定属性名称检索 UI 元素的属性。如果属性不存在，则返回"无"。
@@ -274,6 +294,7 @@ class AirtestPoco(object):
         hierarchy_dict = frozen_poco.agent.hierarchy.dump()
         return hierarchy_dict
 
+    @allure.step("poco元素存在：")
     def poco_exists(self, **kwargs):
         """
         测试UI元素是否在层次结构中
@@ -283,6 +304,7 @@ class AirtestPoco(object):
         log("元素{}验证结果: {}".format(kwargs, result))
         return result
 
+    @allure.step("poco滚动屏幕：")
     def poco_scroll(self, direction: str = 'vertical', percent: float = 0.5, duration: float = 2.0):
         """
         从整个屏幕的下部滚动到上部
@@ -294,6 +316,7 @@ class AirtestPoco(object):
         self.poco.scroll(direction=direction,
                          percent=percent, duration=duration)
 
+    @allure.step("poco滑动：")
     def poco_swipe(self, p1, p2=None, direction=None, duration: float = 2.0):
         """
         在目标设备上通过起点和终点或方向向量指定的点到点执行滑动操作。必须至少提供端点或方向之一。
@@ -315,13 +338,32 @@ class AirtestPoco(object):
     aircv-method
     """
 
+    @allure.step("元素截图：")
     def crop_image(self, rect: list):
         """局部截图
         :param rect = [x_min, y_min, x_max ,y_max].
+        :return filepath 图片路径
         """
+        # 局部截图
         img = G.DEVICE.snapshot()
-        crop_screen = crop_image(img, rect)  # 局部截图
-        self.api.try_log_screen(crop_screen)  # 保存局部截图到logs文件夹中
+        crop_screen = crop_image(img, rect)
+        # 生成截图路径
+        filename = "%(time)d.jpg" % {'time': timestamp() * 1000}
+        filepath = os.path.join(ST.LOG_DIR, filename)
+        # 保存局部截图到logs文件夹中
+        pil_image = cv2_2_pil(crop_screen)
+        pil_image.save(filepath, quality=99, optimize=True)
+        return filepath
+
+    @allure.step("图片文字识别：")
+    def tesseract_string(self, filepath, lang='eng+chi_sim', config='--psm 6'):
+        """识别图片文字"""
+        # 读取图片
+        image = Image.open(filepath)
+        # 识别图片文字
+        result = pytesseract.image_to_string(image, lang=lang, config=config)
+        # 返回并清除结果的空格
+        return result.replace(" ", "")
 
 
 d = AirtestPoco()
