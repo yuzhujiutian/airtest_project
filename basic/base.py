@@ -180,7 +180,7 @@ class AirtestPoco(object):
         截图保存为base64
         :return:
         """
-        filename = self.api.try_log_screen()['screen']
+        filename = self.api.snapshot()['screen']
         filepath = os.path.join(TEST_LOG, filename)
         allure.attach.file(filepath, "异常截图..." + filename,
                            allure.attachment_type.JPG)
