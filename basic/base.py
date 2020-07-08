@@ -359,9 +359,21 @@ class AirtestPoco(object):
     def tesseract_string(self, filepath, lang='eng+chi_sim', config='--psm 6'):
         """识别图片文字"""
         # 读取图片
-        image = Image.open(filepath)
+        im = Image.open(filepath)
         # 识别图片文字
-        result = pytesseract.image_to_string(image, lang=lang, config=config)
+        # 进行置灰处理
+        im = im.convert('L')
+        # 这个是二值化阈值
+        threshold = 150
+        table = []
+        for i in range(256):
+            if i < threshold:
+                table.append(0)
+            else:
+                table.append(1)
+        # 通过表格转换成二进制图片，1的作用是白色，0就是黑色
+        im = im.point(table, "1")
+        result = pytesseract.image_to_string(im,lang=lang, config=config)
         # 返回并清除结果的空格
         return result.replace(" ", "")
 

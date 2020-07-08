@@ -6,12 +6,12 @@ sys.path.append('.')
 __author__ = '1084502012@qq.com'
 
 import os
-from config.conf import AIR_IMG_PATH
+from config.conf import PAGE_IMG
 
 
 class ReadImg(object):
     def __init__(self, name):
-        self.path = os.path.join(AIR_IMG_PATH, name)
+        self.path = os.path.join(PAGE_IMG, name)
 
     def __getitem__(self, item):
         result = os.path.join(self.path, "{}.png".format(item))
@@ -28,4 +28,4 @@ icon_img = ReadImg('guide')
 __all__ = ['index_img', 'my_img', 'act_img', 'icon_img']
 
 if __name__ == '__main__':
-    pass
+    print(my_img['我的头像'])
