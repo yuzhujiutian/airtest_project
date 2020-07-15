@@ -1,8 +1,6 @@
-python3 tools/clear_history.py
+source venv/bin/activate
 
-python3 tools/copy_history.py
-
-python3 -m pytest --alluredir allure-results
+pytest --alluredir allure-results --clean-alluredir
 
 allure generate allure-results -c -o allure-report
 

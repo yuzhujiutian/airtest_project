@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import sys
-
-sys.path.append('.')
-__author__ = '1084502012@qq.com'
-__all__ = ['ini']
-
 import os
 import configparser
 from config.conf import INI_PATH

@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import sys
-
-sys.path.append('.')
-__author__ = '1084502012@qq.com'
-
 import pytest
 import allure
 from pytest import assume
-from basic.base import *
-from tools.times import strftime
+from core.aircore import *
+from utils.times import strftime
 from pages.homepage import back_home
 
 

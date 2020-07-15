@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import sys
-
-sys.path.append('.')
-__author__ = '1084502012@qq.com'
-
 from airtest.core.android.android import Android
 from airtest.core.android.constant import YOSEMITE_IME_SERVICE
 
 
-class AndroidDev:
+class AirDevice:
     """
     安卓相关获取的命令
     """
@@ -52,7 +47,7 @@ class AndroidDev:
         self.adb.shell("ime set %s" % ime)
 
 
-android_dev = AndroidDev()
+android_dev = AirDevice()
 __all__ = ['android_dev']
 
 if __name__ == '__main__':

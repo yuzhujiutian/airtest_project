@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import sys
-
-sys.path.append('.')
-__author__ = '1084502012@qq.com'
-
 import time
 import pytest
 import allure
 from py._xmlgen import html
-from basic.base import *
-from basic.android_dev import android_dev
+from core.aircore import *
+from core.airdevice import android_dev
 from common.readconfig import ini
 
 

@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import sys
-
-sys.path.append('.')
-__author__ = '1084502012@qq.com'
-
 import allure
 import pytest
 from pytest import assume
-from basic.base import *
+from core.aircore import *
 from common.readimg import *
-from pages.homepage import back
 from common.readyaml import page_data
 
 

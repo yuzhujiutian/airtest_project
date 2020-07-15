@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import sys
-
-sys.path.append('.')
-__author__ = '1084502012@qq.com'
-__all__ = ['d', 'G', 'ST', 'log', 'airtest_exception', 'poco_exception']
-
 import os
 import allure
 import base64
 import pytesseract
 from PIL import Image
-from config.conf import TEST_LOG
-from tools.times import timestamp
-from tools.logger import clear_log
-from tools.logger import init_logging
+from utils.times import timestamp
+from utils.logger import clear_log
+from utils.logger import init_logging
+from config.conf import AIRTEST_LOG
 
 from airtest.core import api
 from airtest.core.cv import Template
@@ -22,7 +16,7 @@ from airtest.utils.transform import TargetPos
 from airtest.core.settings import Settings as ST
 from airtest.core.helper import G, set_logdir, log
 
-from basic.android_dev import android_dev
+from core.airdevice import android_dev
 from airtest.aircv import crop_image, cv2_2_pil
 
 from poco.proxy import UIObjectProxy
@@ -30,6 +24,8 @@ from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 # exceptions
 from airtest.core import error as airtest_exception
 from poco import exceptions as poco_exception
+
+__all__ = ['d', 'G', 'ST', 'log', 'airtest_exception', 'poco_exception']
 
 
 class AirtestPoco(object):
@@ -48,8 +44,8 @@ class AirtestPoco(object):
         # 删除旧日志
         clear_log()
         # 设置全局日志目录
-        set_logdir(TEST_LOG)
-        log("设置全局日志目录：%s" % TEST_LOG)
+        set_logdir(AIRTEST_LOG)
+        log("设置全局日志目录：%s" % AIRTEST_LOG)
         # # 初始化日志
         init_logging()
 
@@ -373,7 +369,7 @@ class AirtestPoco(object):
                 table.append(1)
         # 通过表格转换成二进制图片，1的作用是白色，0就是黑色
         im = im.point(table, "1")
-        result = pytesseract.image_to_string(im,lang=lang, config=config)
+        result = pytesseract.image_to_string(im, lang=lang, config=config)
         # 返回并清除结果的空格
         return result.replace(" ", "")
 

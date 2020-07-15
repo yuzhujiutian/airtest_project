@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import sys
-
-sys.path.append('.')
-__author__ = '1084502012@qq.com'
-__all__ = ['get_report']
-
 import os
-from tools.times import strftime
+from utils.times import strftime
 from config.conf import REPORT_PATH, TEST_CASE
 from airtest.utils.compat import script_dir_name
 from airtest.report.report import LogToHtml, HTML_TPL
+
+__all__ = ['get_report']
 
 
 def report_path():
