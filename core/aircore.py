@@ -41,11 +41,11 @@ class AirtestPoco(object):
         """
         init初始化
         """
-        # 删除旧日志
-        clear_log()
         # 设置全局日志目录
         set_logdir(AIRTEST_LOG)
         log("设置全局日志目录：%s" % AIRTEST_LOG)
+        # 删除旧日志
+        clear_log(ST.LOG_DIR)
         # # 初始化日志
         init_logging()
 
@@ -177,7 +177,7 @@ class AirtestPoco(object):
         :return:
         """
         filename = self.api.snapshot()['screen']
-        filepath = os.path.join(TEST_LOG, filename)
+        filepath = os.path.join(ST.LOG_DIR, filename)
         allure.attach.file(filepath, "异常截图..." + filename,
                            allure.attachment_type.JPG)
         if bs64:

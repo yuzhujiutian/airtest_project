@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 import os
+import shutil
 import logging
 import datetime
-from config.conf import LOG_PATH, TEST_LOG
+from config.conf import LOG_PATH
 
 
 def log_file():
@@ -28,14 +29,14 @@ def init_logging():
     logger.addHandler(handler)
 
 
-def clear_log():
+def clear_log(path):
     """清除上一次的日志记录"""
-    for i in os.listdir(TEST_LOG):
-        file = os.path.join(TEST_LOG, i)
-        os.remove(file)
-        print("删除：{}".format(file))
+    try:
+        shutil.rmtree(path)
+        print("删除：{}".format(path))
+    except FileNotFoundError:
+        pass
 
 
 if __name__ == '__main__':
-    print(log_file())
-    print(clear_log())
+    clear_log('123')

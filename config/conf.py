@@ -20,9 +20,6 @@ YAML_PATH = os.path.join(BASE_DIR, 'page_element')
 # airtest_img
 PAGE_IMG = os.path.join(BASE_DIR, 'page_images')
 
-# 测试用例
-TEST_CASE = os.path.join(BASE_DIR, 'TestCase')
-
 # report_path
 REPORT_PATH = os.path.join(BASE_DIR, "report")
 
