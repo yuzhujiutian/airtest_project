@@ -4,7 +4,7 @@ import os
 import shutil
 import logging
 import datetime
-from config.conf import LOG_PATH
+from config import LOG_PATH
 
 
 def log_file():

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 import os
+import shutil
 from core.aircore import ST
 from utils.times import strftime
-from config.conf import BASE_DIR, REPORT_PATH
+from config import REPORT_PATH, apps
 from airtest.utils.compat import script_dir_name
 from airtest.report.report import LogToHtml, HTML_TPL
-
-__all__ = ['get_report']
 
 
 def report_path():
@@ -26,7 +25,19 @@ def get_report(script, log_root=ST.LOG_DIR, outfile='log.html', static_root="", 
     rpt.report(HTML_TPL, output_file=outfile, record_list=record_list)
 
 
-script_file = os.path.join(BASE_DIR, 'TestCase', 'conftest.py')
+def del_report():
+    var = True
+    for i in os.listdir(REPORT_PATH):
+        new_path = os.path.join(REPORT_PATH, i)
+        if os.path.isdir(new_path):
+            shutil.rmtree(new_path)
+            print("删除{}成功！".format(new_path))
+            var = False
+    if var:
+        print("没有删除任何相关文件！")
+
+
+script_file = os.path.join(apps['heyolx'], 'tests', 'conftest.py')
 
 if __name__ == '__main__':
     get_report(script_file)

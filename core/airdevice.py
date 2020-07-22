@@ -47,8 +47,8 @@ class AirDevice:
         self.adb.shell("ime set %s" % ime)
 
 
-android_dev = AirDevice()
-__all__ = ['android_dev']
+airDev = AirDevice()
+__all__ = ['airDev']
 
 if __name__ == '__main__':
-    print(android_dev.device_id)
+    print(airDev.device_id)

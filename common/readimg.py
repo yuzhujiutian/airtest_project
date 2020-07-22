@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 import os
-from config.conf import PAGE_IMG
+from config import PAGE_IMG
 
 
 class ReadImg(object):

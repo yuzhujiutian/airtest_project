@@ -8,7 +8,7 @@ from PIL import Image
 from utils.times import timestamp
 from utils.logger import clear_log
 from utils.logger import init_logging
-from config.conf import AIRTEST_LOG
+from config import AIRTEST_LOG
 
 from airtest.core import api
 from airtest.core.cv import Template
@@ -16,7 +16,7 @@ from airtest.utils.transform import TargetPos
 from airtest.core.settings import Settings as ST
 from airtest.core.helper import G, set_logdir, log
 
-from core.airdevice import android_dev
+from core.airdevice import airDev
 from airtest.aircv import crop_image, cv2_2_pil
 
 from poco.proxy import UIObjectProxy
@@ -25,7 +25,7 @@ from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 from airtest.core import error as airtest_exception
 from poco import exceptions as poco_exception
 
-__all__ = ['d', 'G', 'ST', 'log', 'airtest_exception', 'poco_exception']
+__all__ = ['AirtestPoco','G', 'ST', 'log', 'airtest_exception', 'poco_exception']
 
 
 class AirtestPoco(object):
@@ -37,23 +37,24 @@ class AirtestPoco(object):
         text, textMatches
     """
 
-    def __init__(self):
+    def __init__(self, device):
         """
         init初始化
         """
-        # 设置全局日志目录
+        # 设置日志目录
         set_logdir(AIRTEST_LOG)
-        log("设置全局日志目录：%s" % AIRTEST_LOG)
         # 删除旧日志
         clear_log(ST.LOG_DIR)
-        # # 初始化日志
+        # 初始化日志
         init_logging()
+        # 等待显示时间
+        self.timeout = ST.FIND_TIMEOUT
 
-        self.api = api  # airtest-api
-        self.poco = AndroidUiautomationPoco(
-            use_airtest_input=True, screenshot_each_action=False)
+        # airtest-api
+        self.api = api
+        self.poco = AndroidUiautomationPoco(device, use_airtest_input=True,
+                                            screenshot_each_action=False)
         self.UIObj = UIObjectProxy(poco=self.poco)
-        self.timeout = ST.FIND_TIMEOUT  # 等待显示时间
 
     """
     AirTest-Method
@@ -62,7 +63,7 @@ class AirtestPoco(object):
 
     @classmethod
     def temp(cls, img_name: str, rgb: bool = True, record_pos: tuple = (0.5, -0.5),
-             resolution: tuple = android_dev.screen, target_pos=TargetPos.MID):
+             resolution: tuple = airDev.screen, target_pos=TargetPos.MID):
         """CV识别主函数
         :param rgb: 灰度识别还是色彩识别
         :param record_pos: 图片坐标
@@ -178,7 +179,7 @@ class AirtestPoco(object):
         """
         filename = self.api.snapshot()['screen']
         filepath = os.path.join(ST.LOG_DIR, filename)
-        allure.attach.file(filepath, "异常截图..." + filename,
+        allure.attach.file(filepath, "截图" + filename,
                            allure.attachment_type.JPG)
         if bs64:
             with open(filepath, 'rb') as f:
@@ -374,7 +375,5 @@ class AirtestPoco(object):
         return result.replace(" ", "")
 
 
-d = AirtestPoco()
-
 if __name__ == '__main__':
-    print(d)
+    pass

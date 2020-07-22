@@ -2,16 +2,34 @@
 # -*- coding:utf-8 -*-
 import time
 import pytest
+import allure
+from config import ini
 from py._xmlgen import html
-from core.aircore import *
-from airtest.core.api import connect_device
+from core.aircore import log
+from core.airdevice import airDev
 
 
-@pytest.fixture(scope='session')
-def d():
-    device = connect_device("android:///")
-    driver = AirtestPoco(device)
-    yield driver
+@allure.epic("曲江池遗址公园")
+@pytest.fixture(scope='session', autouse=True)
+def set_session(request, d):
+    """
+    切换输入法
+    """
+    allure.step("开始测试！")
+    log(airDev.device_id)
+    d.api.wake()
+    d.api.start_app(ini['heyolx'].package_name)
+    d.poco_click(text="发现")
+    d.poco_click(text="小程序")
+    d.poco_click(text="西安曲江池遗址公园")
+
+    def fn():
+        d.poco_click(desc="关闭")
+        d.api.stop_app(ini.package_name)
+        airDev.close_yosemite_ime(ini['heyolx'].default_ime)  # 返回至默认的键盘
+        allure.step("结束测试！")
+
+    request.addfinalizer(fn)
 
 
 @pytest.mark.hookwrapper
@@ -54,6 +72,22 @@ def pytest_html_results_table_html(report, data):
     if report.passed:
         del data[:]
         data.append(html.div('passed.', class_='empty log'))
+
+
+def pytest_html_report_title(report):
+    report.title = "曲江池遗址公园小程序UI测试！"
+
+
+@pytest.mark.optionalhook
+def pytest_configure(config):
+    config._metadata.clear()
+    config._metadata['项目名称'] = "曲江池遗址公园小程序"
+
+
+@pytest.mark.optionalhook
+def pytest_html_results_summary(prefix):
+    prefix.extend([html.p("所属部门: 云景测试")])
+    prefix.extend([html.p("测试执行人: 侯伟轩")])
 
 
 def pytest_terminal_summary(terminalreporter, exitstatus, config):

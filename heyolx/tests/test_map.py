@@ -2,10 +2,12 @@
 # -*- coding:utf-8 -*-
 import allure
 import pytest
-from pytest import assume
-from core.aircore import *
+from config import elements
+from core.aircore import log
 from common.readimg import *
-from common.readyaml import page_data
+from common.readyaml import ReadYaml
+
+page_data = ReadYaml(elements['heyolx'], 'page_data')
 
 
 @allure.feature("导览地图ICON")
@@ -13,12 +15,12 @@ class TestMap:
     """导览地图"""
 
     @pytest.fixture(scope='function', autouse=True)
-    def guide_to_visitors(self):
+    def guide_to_visitors(self, d):
         d.poco_click(text='导览')
         d.wait(d.temp(index_img['导览首页'], record_pos=(0.398, 0.261)))
 
     @allure.title("测试景点icon在地图中的显示")
-    def test_001(self):
+    def test_001(self, d):
         """测试景点icon在地图中的显示"""
         results = []
         for i in page_data['导览列表']:
@@ -30,10 +32,9 @@ class TestMap:
             result = d.find_all(d.temp(icon_img['%sicon' % i]))
             log(str(result))
             results.append(result)
-        with assume:
-            assert all(results), "icon查找有报错:%s" % results
+        pytest.assume(all(results))
 
-    def test_002(self):
+    def test_002(self, d):
         """测试景点列表的滑动"""
         d.touch(d.temp(index_img['导览首页'], record_pos=(0.398, 0.261)))
         for _ in range(10):
@@ -44,7 +45,7 @@ class TestMap:
         d.touch(d.temp(icon_img["关闭景点列表"], record_pos=(-0.291, -0.025)))
 
     @allure.story("放大缩小地图")
-    def test_003(self):
+    def test_003(self, d):
         """放大缩小地图、定位按钮"""
         for _ in range(5):
             d.poco_click_pos([0.9009259259259259, 0.7402777777777778])
